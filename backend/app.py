@@ -1,11 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-from google.cloud import aiplatform
-from google.protobuf import json_format
-from google.protobuf.struct_pb2 import Value
-import json
-import time
+import requests
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -16,14 +12,8 @@ CORS(app, resources={
     }
 })
 
-# Initialize Vertex AI lazily so missing configuration doesn't crash the server
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
-REGION = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
-
-if PROJECT_ID:
-    aiplatform.init(project=PROJECT_ID, location=REGION)
-else:
-    print("Warning: GOOGLE_CLOUD_PROJECT not set. Vertex AI features disabled.")
+# Read OpenAI API key from environment
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 @app.route('/api/generate', methods=['POST', 'OPTIONS'])
 def generate_images():
@@ -46,43 +36,32 @@ def generate_images():
                 'message': 'Prompt is required'
             }), 400
 
-        if not PROJECT_ID:
+        if not OPENAI_API_KEY:
             return jsonify({
                 'success': False,
-                'message': 'Vertex AI not configured'
+                'message': 'OpenAI API key not configured'
             }), 500
 
-        # Initialize the Vertex AI model
-        model = aiplatform.Model(
-            model_name="imagegeneration@001",
-            project=PROJECT_ID,
-            location=REGION,
-        )
-
-        instance = {
-            "prompt": prompt,
-            "number_of_images": 4,
-            "image_size": {
-                "width": 1024,
-                "height": 1024
-            }
+        payload = {
+            'model': 'dall-e-3',
+            'prompt': prompt,
+            'n': 4,
+            'size': '1024x1024'
+        }
+        headers = {
+            'Authorization': f'Bearer {OPENAI_API_KEY}',
+            'Content-Type': 'application/json'
         }
 
-        # Convert the instance to protobuf Value
-        instance_value = json_format.Parse(
-            json.dumps(instance),
-            Value()
+        resp = requests.post(
+            'https://api.openai.com/v1/images/generations',
+            headers=headers,
+            json=payload,
+            timeout=30
         )
-
-        # Generate images
-        response = model.predict([instance_value])
-        
-        # Extract image URLs from response
-        generated_images = []
-        for prediction in response.predictions:
-            image_data = json.loads(prediction)
-            if 'images' in image_data:
-                generated_images.extend(image_data['images'])
+        resp.raise_for_status()
+        data = resp.json()
+        generated_images = [item['url'] for item in data.get('data', [])]
 
         return jsonify({
             'success': True,
