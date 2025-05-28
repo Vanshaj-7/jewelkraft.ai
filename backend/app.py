@@ -31,7 +31,13 @@ def generate_images():
         return '', 204
 
     try:
-        data = request.json
+        data = request.get_json(silent=True)
+        if data is None:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid JSON payload'
+            }), 400
+
         prompt = data.get('prompt', '')
 
         if not prompt:
