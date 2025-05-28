@@ -4,7 +4,7 @@ A modern web application that uses AI to generate custom jewelry designs based o
 
 ## Features
 
-- AI-powered jewelry image generation using Vertex AI
+- AI-powered jewelry image generation using DALL·E
 - User-friendly prompt interface for describing desired jewelry
 - Multiple image generation (5+ options) from a single prompt
 - Detailed product pages with jewelry-specific attributes
@@ -14,7 +14,7 @@ A modern web application that uses AI to generate custom jewelry designs based o
 
 - **Frontend**: React, TypeScript, Tailwind CSS, Framer Motion
 - **Backend**: Python, Flask
-- **API Integration**: Google Cloud Vertex AI
+- **API Integration**: OpenAI DALL·E
 
 ## Getting Started
 
@@ -63,12 +63,17 @@ npm run dev
 
 ## Development
 
-For real Vertex AI integration, you would need to:
+To enable DALL·E image generation you will need an OpenAI API key. Set the
+`OPENAI_API_KEY` environment variable before starting the backend.
+## Tests
 
-1. Set up a Google Cloud account
-2. Enable Vertex AI API
-3. Create a service account and download credentials
-4. Update the backend code to use these credentials
+Run lint and build to verify the project:
+
+```bash
+npm run lint
+npm run build
+```
+
 
 ## License
 
