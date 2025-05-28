@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  @apply bg-neutral-50 text-neutral-900;
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.container {
+  @apply px-4 mx-auto;
+  max-width: 1400px;
+}
+
+@layer utilities {
+  .gradient-gold {
+    background: linear-gradient(45deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+  }
+  
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
+  }
+}
