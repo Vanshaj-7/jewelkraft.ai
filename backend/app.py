@@ -16,32 +16,47 @@ CORS(app, resources={
     }
 })
 
-# Initialize Vertex AI
-aiplatform.init(
-    project=os.getenv('GOOGLE_CLOUD_PROJECT'),
-    location=os.getenv('GOOGLE_CLOUD_REGION', 'us-central1'),
-)
+# Initialize Vertex AI lazily so missing configuration doesn't crash the server
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+REGION = os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
+
+if PROJECT_ID:
+    aiplatform.init(project=PROJECT_ID, location=REGION)
+else:
+    print("Warning: GOOGLE_CLOUD_PROJECT not set. Vertex AI features disabled.")
 
 @app.route('/api/generate', methods=['POST', 'OPTIONS'])
 def generate_images():
     if request.method == 'OPTIONS':
         return '', 204
-        
+
     try:
-        data = request.json
+        data = request.get_json(silent=True)
+        if data is None:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid JSON payload'
+            }), 400
+
         prompt = data.get('prompt', '')
-        
+
         if not prompt:
             return jsonify({
                 'success': False,
                 'message': 'Prompt is required'
             }), 400
 
+        if not PROJECT_ID:
+            return jsonify({
+                'success': False,
+                'message': 'Vertex AI not configured'
+            }), 500
+
         # Initialize the Vertex AI model
         model = aiplatform.Model(
             model_name="imagegeneration@001",
-            project=os.getenv('GOOGLE_CLOUD_PROJECT'),
-            location=os.getenv('GOOGLE_CLOUD_REGION', 'us-central1'),
+            project=PROJECT_ID,
+            location=REGION,
         )
 
         instance = {
