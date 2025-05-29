@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Star, ShoppingCart, Heart, Share2, Info } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Share2, Info, ArrowLeft } from 'lucide-react';
 import { cn } from '../utils/classNames';
 
 interface ProductDetails {
@@ -13,7 +14,16 @@ interface ProductDetails {
   weight_ranges: string[];
 }
 
+interface LocationState {
+  selectedImage: string;
+  prompt: string;
+}
+
 const ProductPage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { selectedImage, prompt } = (location.state as LocationState) || {};
+  
   const [details, setDetails] = useState<ProductDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -27,6 +37,13 @@ const ProductPage: React.FC = () => {
   const [selectedWeight, setSelectedWeight] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   
+  // Redirect if no image selected
+  useEffect(() => {
+    if (!selectedImage) {
+      navigate('/');
+    }
+  }, [selectedImage, navigate]);
+
   // Fetch product details
   useEffect(() => {
     const fetchDetails = async () => {
@@ -52,9 +69,6 @@ const ProductPage: React.FC = () => {
     fetchDetails();
   }, []);
   
-  // Sample image for product display
-  const productImage = "https://images.pexels.com/photos/10984851/pexels-photo-10984851.jpeg";
-  
   if (isLoading) {
     return (
       <div className="container py-16 flex justify-center">
@@ -66,45 +80,51 @@ const ProductPage: React.FC = () => {
   return (
     <div className="bg-white">
       <div className="container py-12">
+        <button 
+          onClick={() => navigate('/')}
+          className="mb-8 inline-flex items-center text-neutral-600 hover:text-neutral-900"
+        >
+          <ArrowLeft size={20} className="mr-2" />
+          Back to Designs
+        </button>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-neutral-50 rounded-lg overflow-hidden">
               <img 
-                src={productImage} 
-                alt="Gold diamond ring" 
+                src={selectedImage} 
+                alt="Selected jewelry design" 
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="grid grid-cols-4 gap-2">
-              {[productImage, productImage, productImage, productImage].map((img, idx) => (
-                <div 
-                  key={idx} 
-                  className="aspect-square bg-neutral-50 rounded-md overflow-hidden border border-neutral-200"
-                >
-                  <img 
-                    src={img} 
-                    alt={`Product view ${idx + 1}`} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+            {prompt && (
+              <div className="mt-4 p-4 bg-neutral-50 rounded-lg">
+                <h3 className="text-sm font-medium text-neutral-700 mb-2">Design Description</h3>
+                <p className="text-neutral-600">{prompt}</p>
+              </div>
+            )}
           </div>
           
           {/* Product Details */}
           <div className="space-y-8">
             <div>
-              <h1 className="text-3xl font-serif mb-2">Elegance Diamond Ring</h1>
-              <div className="flex items-center mb-4">
-                <div className="flex text-gold-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={18} fill="currentColor" />
+              <h1 className="text-3xl font-serif mb-4">Custom Jewelry Design</h1>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={20}
+                      className={cn(
+                        "text-gold-500",
+                        star <= 4 ? "fill-current" : "fill-none"
+                      )}
+                    />
                   ))}
                 </div>
-                <span className="ml-2 text-neutral-600">32 reviews</span>
+                <span className="text-neutral-500">4.9 (120 reviews)</span>
               </div>
-              <div className="text-2xl font-medium">$1,299.00</div>
             </div>
             
             <div className="space-y-6">

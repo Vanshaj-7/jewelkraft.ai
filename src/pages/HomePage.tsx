@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowRight, Gem } from 'lucide-react';
 import PromptInput from '../components/PromptInput';
 import ImageGallery from '../components/ImageGallery';
 import axios from 'axios';
+import { cn } from '../utils/classNames';
 
 interface GenerationResponse {
   success: boolean;
@@ -13,15 +14,21 @@ interface GenerationResponse {
 }
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handlePromptSubmit = async (promptText: string) => {
     setIsLoading(true);
     setError(null);
     setPrompt(promptText);
+    setGeneratedImages([]);
+    setProgress(0);
+    setSelectedImage(null);
     
     try {
       const response = await axios.post<GenerationResponse>(
@@ -31,21 +38,42 @@ const HomePage: React.FC = () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          timeout: 10000 // 10 second timeout
+          timeout: 120000 // Increased timeout to 2 minutes for multiple images
         }
       );
       
       if (response.data.success) {
+        console.log('Received images:', response.data.images);
         setGeneratedImages(response.data.images);
+        setProgress(100);
       } else {
         throw new Error(response.data.message || 'Failed to generate images');
       }
     } catch (err) {
       console.error('Error generating images:', err);
-      setError('Failed to generate images. Please try again.');
+      if (axios.isAxiosError(err)) {
+        if (err.code === 'ECONNABORTED') {
+          setError('Request timed out. Please try again.');
+        } else {
+          setError(err.response?.data?.message || 'Failed to generate images. Please try again.');
+        }
+      } else {
+        setError('Failed to generate images. Please try again.');
+      }
       setGeneratedImages([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleViewProductDetails = () => {
+    if (selectedImage) {
+      navigate('/product', { 
+        state: { 
+          selectedImage,
+          prompt
+        }
+      });
     }
   };
 
@@ -79,25 +107,48 @@ const HomePage: React.FC = () => {
           
           {(isLoading || generatedImages.length > 0 || prompt) && (
             <div className="max-w-5xl mx-auto">
-              {prompt && !isLoading && (
+              {prompt && (
                 <div className="mb-8">
                   <h2 className="text-2xl font-serif mb-2">Generated Designs</h2>
                   <p className="text-neutral-500">Based on: "{prompt}"</p>
+                  {isLoading && (
+                    <div className="mt-4">
+                      <div className="w-full bg-neutral-100 rounded-full h-2.5">
+                        <div 
+                          className="bg-gold-500 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-neutral-500 mt-2">
+                        Generating multiple design variations... {progress}%
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               
-              <ImageGallery images={generatedImages} isLoading={isLoading} />
+              <ImageGallery 
+                images={generatedImages} 
+                isLoading={isLoading} 
+                onProgress={setProgress}
+                onImageSelect={setSelectedImage}
+              />
               
               {generatedImages.length > 0 && (
                 <div className="mt-12 text-center">
-                  <Link 
-                    to="/product" 
-                    className="inline-flex items-center px-8 py-3 bg-gold-600 text-white rounded-full
-                            hover:bg-gold-500 transition-colors shadow-md hover:shadow-lg"
+                  <button 
+                    onClick={handleViewProductDetails}
+                    disabled={!selectedImage}
+                    className={cn(
+                      "inline-flex items-center px-8 py-3 rounded-full transition-colors shadow-md hover:shadow-lg",
+                      selectedImage 
+                        ? "bg-gold-600 text-white hover:bg-gold-500" 
+                        : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                    )}
                   >
                     <span>View Product Details</span>
                     <ArrowRight size={18} className="ml-2" />
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
