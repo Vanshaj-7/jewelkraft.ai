@@ -1,67 +1,74 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { cn } from '../utils/classNames';
+import { validatePrompt, ValidationError } from '../utils/validation';
+import { useToast } from '../context/ToastContext';
 
 interface PromptInputProps {
   onSubmit: (prompt: string) => void;
   isLoading: boolean;
+  inputId?: string;
 }
 
-const PromptInput: React.FC<PromptInputProps> = ({ onSubmit, isLoading }) => {
+const PromptInput: React.FC<PromptInputProps> = ({ onSubmit, isLoading, inputId }) => {
   const [prompt, setPrompt] = useState('');
+  const [error, setError] = useState<ValidationError | null>(null);
+  const { showToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim() && !isLoading) {
-      onSubmit(prompt.trim());
+    
+    const validationError = validatePrompt(prompt);
+    if (validationError) {
+      setError(validationError);
+      showToast(validationError.message, 'error');
+      return;
     }
+
+    setError(null);
+    onSubmit(prompt);
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          type="text"
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="relative">
+        <textarea
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe your dream jewelry piece..."
-          className={cn(
-            "w-full px-6 py-4 pr-36 text-lg rounded-full border border-neutral-200",
-            "focus:outline-none focus:ring-2 focus:ring-gold-300 focus:border-transparent",
-            "transition-all shadow-soft hover:shadow-md",
-            "placeholder:text-neutral-400"
-          )}
+          onChange={(e) => {
+            setPrompt(e.target.value);
+            setError(null);
+          }}
+          placeholder="Describe your dream silver jewelry piece... (e.g., 'A delicate silver necklace with a small sapphire pendant, featuring a modern geometric design')"
+          className={`
+            w-full h-32 p-4 pr-12 rounded-xl border border-platinum bg-white shadow focus:outline-none focus:ring-2 focus:ring-lavender-300 text-charcoal
+            ${error ? 'border-red-400' : 'border-platinum'}
+          `}
           disabled={isLoading}
+          id={inputId}
         />
         <button
-          type="submit"
-          disabled={isLoading || !prompt.trim()}
-          className={cn(
-            "absolute right-2 top-2 bottom-2 px-6 rounded-full flex items-center justify-center",
-            "text-white font-medium transition-all",
-            isLoading ? 
-              "bg-neutral-400 cursor-not-allowed" : 
-              "bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-500 hover:to-gold-400",
-            "shadow-sm hover:shadow"
-          )}
+          type="button"
+          className="absolute top-1/2 right-3 -translate-y-1/2 p-1 bg-lavender-100 rounded hover:bg-lavender-200 transition-colors cursor-pointer shadow"
+          aria-label="Suggest prompt"
         >
-          {isLoading ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin h-4 w-4 border-2 border-white border-opacity-50 border-t-white rounded-full"></div>
-              <span>Creating</span>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <Sparkles size={18} />
-              <span>Generate</span>
-            </div>
-          )}
+          <Sparkles size={20} className="text-lavender-300" />
         </button>
-      </form>
-      <p className="text-neutral-500 text-sm mt-2 text-center">
-        Example: "A delicate gold necklace with diamond pendant" or "Sapphire engagement ring with platinum band"
-      </p>
-    </div>
+      </div>
+      {error && (
+        <p className="mt-2 text-sm text-red-400">
+          {error.message}
+        </p>
+      )}
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-slate-400">{prompt.length}/500 characters</span>
+        <button
+          type="submit"
+          className="px-6 py-2 bg-lavender-300 text-white rounded-full hover:bg-blue-200 transition-colors font-medium shadow"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Dreaming...' : 'Dream'}
+        </button>
+      </div>
+    </form>
   );
 };
 

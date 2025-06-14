@@ -180,8 +180,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               className={cn(
                 "aspect-square rounded-md overflow-hidden border-2 transition-all",
                 selectedImage === image 
-                  ? "border-gold-500 shadow-md scale-105 z-10" 
-                  : "border-transparent hover:border-gold-300"
+                  ? "border-silver-400 shadow-md scale-105 z-10" 
+                  : "border-transparent hover:border-silver-300"
               )}
             >
               <img 

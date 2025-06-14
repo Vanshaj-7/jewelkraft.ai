@@ -16,11 +16,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="py-4 bg-white shadow-soft sticky top-0 z-50">
+      <header className="py-4 gradient-luxury-silver shadow-soft sticky top-0 z-50">
         <div className="container flex items-center justify-between">
           <Link to="/" className="text-2xl font-serif font-bold tracking-tight">
-            <span className="text-gold-600">LuxCraft</span>
-            <span className="text-neutral-800"> AI</span>
+            <span className="bg-gradient-to-r from-platinum via-lavender-300 to-blue-200 bg-clip-text text-transparent">SilverCraft</span>
+            <span className="text-charcoal"> AI</span>
           </Link>
           
           <nav className="hidden md:flex space-x-8 items-center">
@@ -56,8 +56,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <div className="container py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-serif font-bold tracking-tight">
-            <span className="text-gold-600">LuxCraft</span>
-            <span className="text-neutral-800"> AI</span>
+            <span className="bg-gradient-to-r from-platinum via-lavender-300 to-blue-200 bg-clip-text text-transparent">SilverCraft</span>
+            <span className="text-charcoal"> AI</span>
           </Link>
           <button 
             className="p-2 rounded-full hover:bg-neutral-100 transition-colors"
@@ -78,11 +78,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
       
-      <footer className="bg-neutral-900 text-white py-16">
+      <footer className="gradient-luxury-silver text-charcoal py-16">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
-              <h3 className="text-xl font-serif font-medium mb-4">LuxCraft AI</h3>
+              <h3 className="text-xl font-serif font-medium mb-4">SilverCraft AI</h3>
               <p className="text-neutral-400 max-w-xs">
                 Revolutionizing jewelry design with AI technology.
                 Create custom pieces with a simple prompt.
@@ -91,10 +91,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h3 className="text-xl font-serif font-medium mb-4">Quick Links</h3>
               <ul className="space-y-2 text-neutral-400">
-                <li><Link to="/" className="hover:text-gold-300 transition-colors">Home</Link></li>
-                <li><Link to="/product" className="hover:text-gold-300 transition-colors">Products</Link></li>
-                <li><Link to="/#about" className="hover:text-gold-300 transition-colors">About Us</Link></li>
-                <li><Link to="/#contact" className="hover:text-gold-300 transition-colors">Contact</Link></li>
+                <li><Link to="/" className="hover:text-lavender-300 transition-colors">Home</Link></li>
+                <li><Link to="/product" className="hover:text-lavender-300 transition-colors">Products</Link></li>
+                <li><Link to="/#about" className="hover:text-lavender-300 transition-colors">About Us</Link></li>
+                <li><Link to="/#contact" className="hover:text-lavender-300 transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>
@@ -108,7 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-neutral-800 text-center text-neutral-500">
-            <p>&copy; {new Date().getFullYear()} LuxCraft AI. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} SilverCraft AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -125,7 +125,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
   return (
     <Link 
       to={href} 
-      className="text-neutral-700 hover:text-gold-600 transition-colors font-medium"
+      className="text-neutral-700 hover:text-silver-400 transition-colors font-medium"
     >
       {children}
     </Link>
@@ -142,7 +142,7 @@ const MobileNavLink: React.FC<MobileNavLinkProps> = ({ href, children, onClick }
   return (
     <Link 
       to={href} 
-      className="text-2xl font-serif text-neutral-800 hover:text-gold-600 transition-colors"
+      className="text-2xl font-serif text-neutral-800 hover:text-silver-400 transition-colors"
       onClick={onClick}
     >
       {children}

@@ -8,7 +8,7 @@
 }
 
 body {
-  @apply bg-neutral-50 text-neutral-900;
+  @apply bg-primary-50 text-gray-900;
   font-family: var(--font-body);
 }
 
@@ -22,11 +22,35 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @layer utilities {
-  .gradient-gold {
-    background: linear-gradient(45deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+  .gradient-silver {
+    background: linear-gradient(45deg, #C0C0C0, #F3F4F6, #A8A8A8, #E5E7EB, #6B7280);
   }
   
   .text-stroke {
     -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .bg-card {
+    @apply bg-white rounded-xl shadow-soft border border-gray-200;
+  }
+
+  .shimmer-gradient {
+    background: radial-gradient(circle at 60% 40%, #C0C0C0 0%, #F3E8FF 40%, #8B5CF6 70%, #C0C0C0 100%);
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer-move 8s linear infinite;
+  }
+
+  @keyframes shimmer-move {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
   }
 }
