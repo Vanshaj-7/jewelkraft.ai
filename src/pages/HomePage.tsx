@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
 
         // Save the design
         const newDesign: Design = {
-          id: crypto.randomUUID(),
+          id: `${crypto.randomUUID()}-${Date.now()}`,
           userId: 'guest', // We'll update this when we add authentication
           prompt: promptText,
           images: response.data.images,
