@@ -18,7 +18,8 @@ const ProductPage: React.FC = () => {
   const { showToast } = useToast();
   const { selectedImage, prompt } = (location.state as LocationState) || {};
   const [isLoading, setIsLoading] = useState(true);
-  const [savedProduct, setSavedProduct] = useState<Product | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_savedProduct, setSavedProduct] = useState<Product | null>(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
@@ -29,9 +30,9 @@ const ProductPage: React.FC = () => {
 
     // Check if there's a saved product for this design
     const products = storageService.getProducts();
-    const savedProduct = products.find(p => p.designId === prompt);
-    if (savedProduct) {
-      setSavedProduct(savedProduct);
+    const savedProductItem = products.find(p => p.designId === prompt);
+    if (savedProductItem) {
+      setSavedProduct(savedProductItem);
     }
 
     setIsLoading(false);

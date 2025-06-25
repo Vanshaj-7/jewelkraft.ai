@@ -38,6 +38,7 @@ npm install
 cd backend
 pip install -r requirements.txt
 ```
+4. Copy `.env.example` to `.env` and add your OpenAI API key
 
 ### Running the application
 
@@ -63,8 +64,7 @@ npm run dev
 
 ## Development
 
-To enable DALL·E image generation you will need an OpenAI API key. Set the
-`OPENAI_API_KEY` environment variable before starting the backend.
+To enable DALL·E image generation you will need an OpenAI API key. Copy `.env.example` to `.env` and set the `OPENAI_API_KEY` variable before starting the backend.
 ## Tests
 
 Run lint and build to verify the project:
