@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-import requests
 from dotenv import load_dotenv
 import logging
-import asyncio
-import aiohttp
+from openai import OpenAI
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -26,6 +24,7 @@ CORS(app, resources={
 # Read OpenAI API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 logger.debug(f"API Key loaded: {'Yes' if OPENAI_API_KEY else 'No'}")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 def enhance_prompt(user_prompt: str, variation: int = 0) -> str:
     """Enhance the user's prompt with professional photography and jewelry-specific details."""
@@ -113,41 +112,30 @@ def enhance_prompt(user_prompt: str, variation: int = 0) -> str:
     
     return enhanced_prompt
 
-async def generate_single_image(session, prompt: str, variation: int) -> dict:
+def generate_single_image(prompt: str, variation: int) -> dict:
     """Generate a single image with the given prompt and variation."""
     enhanced_prompt = enhance_prompt(prompt, variation)
-    
-    payload = {
-        'model': 'dall-e-3',
-        'prompt': enhanced_prompt,
-        'n': 1,
-        'size': '1024x1024',
-        'quality': 'hd',
-        'style': 'natural'
-    }
-    headers = {
-        'Authorization': f'Bearer {OPENAI_API_KEY}',
-        'Content-Type': 'application/json'
-    }
 
-    async with session.post(
-        'https://api.openai.com/v1/images/generations',
-        headers=headers,
-        json=payload
-    ) as response:
-        if not response.ok:
-            error_detail = await response.json()
-            logger.error(f"OpenAI API Error: {error_detail}")
-            return {
-                'success': False,
-                'error': error_detail.get('error', {}).get('message', str(response.status))
-            }
-        
-        data = await response.json()
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=enhanced_prompt,
+            n=1,
+            size="1024x1024",
+            quality="hd",
+            style="natural",
+        )
+        image_url = response.data[0].url
         return {
             'success': True,
-            'image': data['data'][0]['url'],
+            'image': image_url,
             'variation': variation
+        }
+    except Exception as e:
+        logger.error(f"OpenAI API Error: {e}")
+        return {
+            'success': False,
+            'error': str(e)
         }
 
 @app.route('/api/generate', methods=['POST', 'OPTIONS'])
@@ -185,16 +173,7 @@ def generate_images():
             }), 500
 
         # Generate 5 variations of the image
-        async def generate_all_images():
-            async with aiohttp.ClientSession() as session:
-                tasks = [
-                    generate_single_image(session, prompt, i)
-                    for i in range(5)
-                ]
-                return await asyncio.gather(*tasks)
-
-        # Run the async function
-        results = asyncio.run(generate_all_images())
+        results = [generate_single_image(prompt, i) for i in range(5)]
         
         # Filter successful results and extract image URLs
         successful_results = [r for r in results if r['success']]
