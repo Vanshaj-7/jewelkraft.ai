@@ -3,41 +3,48 @@ import { cn } from '../utils/classNames';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Heart, Loader } from 'lucide-react';
 
+const DUMMY_IMAGES = [
+  '/dummy-images/ring1.jpg',
+  '/dummy-images/necklace1.jpg',
+  '/dummy-images/earring1.jpg',
+  '/dummy-images/bracelet1.jpg',
+  '/dummy-images/ring2.jpg',
+  '/dummy-images/necklace2.jpg',
+];
+
 interface ImageGalleryProps {
-  images: string[];
-  isLoading: boolean;
+  images?: string[];
+  isLoading?: boolean;
   onProgress?: (progress: number) => void;
   onImageSelect?: (image: string) => void;
+  useDummy?: boolean;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ 
-  images, 
-  isLoading, 
-  onProgress,
-  onImageSelect 
-}) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images = [], isLoading = false, onProgress, onImageSelect, useDummy = false }) => {
+  const galleryImages = useDummy ? DUMMY_IMAGES : (images.length > 0 ? images : DUMMY_IMAGES);
   const [selectedImage, setSelectedImage] = useState<string | null>(
-    images.length > 0 ? images[0] : null
+    galleryImages.length > 0 ? galleryImages[0] : null
   );
   const [imageLoadError, setImageLoadError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
+  const [shimmerActive, setShimmerActive] = useState<boolean[]>(galleryImages.map(() => true));
   
   // Update selected image when new images arrive
   useEffect(() => {
-    if (images.length > 0 && !isLoading) {
-      setSelectedImage(images[0]);
+    if (galleryImages.length > 0 && !isLoading) {
+      setSelectedImage(galleryImages[0]);
       setImageLoadError(null);
     }
-  }, [images, isLoading]);
+  }, [galleryImages, isLoading]);
 
   // Update progress as images load
   useEffect(() => {
-    if (onProgress && images.length > 0) {
-      const progress = (loadedImages.size / images.length) * 100;
+    if (onProgress && galleryImages.length > 0) {
+      const progress = (loadedImages.size / galleryImages.length) * 100;
       onProgress(Math.round(progress));
     }
-  }, [loadedImages, images.length, onProgress]);
+  }, [loadedImages, galleryImages.length, onProgress]);
 
   // Notify parent of image selection
   useEffect(() => {
@@ -45,6 +52,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       onImageSelect(selectedImage);
     }
   }, [selectedImage, onImageSelect]);
+
+  useEffect(() => {
+    setShimmerActive(galleryImages.map(() => true));
+    const timer = setTimeout(() => {
+      setShimmerActive(galleryImages.map(() => false));
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [galleryImages.join(',')]);
 
   const handleImageLoad = (imageUrl: string) => {
     setLoadedImages(prev => new Set([...prev, imageUrl]));
@@ -88,7 +103,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     }
   };
 
-  if (isLoading && images.length === 0) {
+  if (isLoading && galleryImages.length === 0) {
     return (
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
@@ -103,7 +118,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     );
   }
 
-  if (images.length === 0 && !isLoading) {
+  if (galleryImages.length === 0 && !isLoading) {
     return (
       <div className="text-center py-12">
         <p className="text-neutral-500">No images generated yet. Enter a prompt to create jewelry designs.</p>
@@ -169,7 +184,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       {/* Thumbnail grid */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         <AnimatePresence>
-          {images.map((image, index) => (
+          {galleryImages.map((image, index) => (
             <motion.button
               key={image}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -184,13 +199,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   : "border-transparent hover:border-silver-300"
               )}
             >
-              <img 
-                src={image} 
-                alt={`Generated jewelry ${index + 1}`} 
-                className="w-full h-full object-cover"
-                onLoad={() => handleImageLoad(image)}
-                onError={() => handleImageError(`Failed to load thumbnail ${index + 1}`)}
-              />
+              <div className={`w-full h-64 ${shimmerActive[index] ? 'shimmer' : ''}`}>
+                <img 
+                  src={image} 
+                  alt={`Generated jewelry ${index + 1}`} 
+                  className="w-full h-full object-cover"
+                  onLoad={() => handleImageLoad(image)}
+                  onError={() => handleImageError(`Failed to load thumbnail ${index + 1}`)}
+                />
+              </div>
             </motion.button>
           ))}
         </AnimatePresence>

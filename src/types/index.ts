@@ -19,7 +19,7 @@ export interface Product {
   designId: string;
   material: string;
   size: string;
-  karat: number;
+  karat?: number;
   color: string;
   hallmark: string;
   purity: string;

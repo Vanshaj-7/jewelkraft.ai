@@ -1,5 +1,60 @@
 {
-  "designs": [],
-  "products": [],
-  "cart": []
+  "designs": [
+    {
+      "id": "design-1",
+      "userId": "user-1",
+      "prompt": "Elegant Silver Ring with Gemstone",
+      "images": ["/dummy-images/ring1.jpg"],
+      "createdAt": "2024-01-15T10:30:00Z",
+      "status": "saved"
+    },
+    {
+      "id": "design-2", 
+      "userId": "user-1",
+      "prompt": "Classic Hoop Earrings",
+      "images": ["/dummy-images/earring1.jpg"],
+      "createdAt": "2024-01-16T14:20:00Z",
+      "status": "saved"
+    }
+  ],
+  "products": [
+    {
+      "id": "product-1",
+      "designId": "design-1",
+      "material": "Sterling Silver",
+      "size": "M",
+      "karat": 925,
+      "color": "Polished",
+      "hallmark": "925",
+      "purity": "92.5% (Sterling Silver)",
+      "weight": "5-10g",
+      "quantity": 1,
+      "status": "cart",
+      "createdAt": "2024-01-15T10:35:00Z"
+    },
+    {
+      "id": "product-2",
+      "designId": "design-2",
+      "material": "Sterling Silver",
+      "size": "S",
+      "karat": 925,
+      "color": "Matte",
+      "hallmark": "925",
+      "purity": "92.5% (Sterling Silver)",
+      "weight": "1-5g",
+      "quantity": 2,
+      "status": "cart",
+      "createdAt": "2024-01-16T14:25:00Z"
+    }
+  ],
+  "cart": [
+    {
+      "productId": "product-1",
+      "quantity": 1
+    },
+    {
+      "productId": "product-2", 
+      "quantity": 2
+    }
+  ]
 } 

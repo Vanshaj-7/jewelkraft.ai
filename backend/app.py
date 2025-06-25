@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 import logging
 from openai import OpenAI
+import uuid
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -25,6 +27,18 @@ CORS(app, resources={
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 logger.debug(f"API Key loaded: {'Yes' if OPENAI_API_KEY else 'No'}")
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+ORDERS_FILE = 'orders.json'
+
+def load_orders():
+    if os.path.exists(ORDERS_FILE):
+        with open(ORDERS_FILE, 'r') as f:
+            return json.load(f)
+    return []
+
+def save_orders(orders):
+    with open(ORDERS_FILE, 'w') as f:
+        json.dump(orders, f, indent=2)
 
 def enhance_prompt(user_prompt: str, variation: int = 0) -> str:
     """Enhance the user's prompt with professional photography and jewelry-specific details."""
@@ -230,6 +244,28 @@ def get_product_details():
     }
     
     return jsonify(product_details)
+
+@app.route('/api/orders', methods=['POST'])
+def create_order():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        order_id = str(uuid.uuid4())
+        order = {
+            'order_id': order_id,
+            'items': data.get('items', []),
+            'shipping': data.get('shipping', {}),
+            'payment_id': data.get('payment_id'),
+            'amount': data.get('amount'),
+            'email': data.get('email'),
+        }
+        orders = load_orders()
+        orders.append(order)
+        save_orders(orders)
+        return jsonify({'success': True, 'order_id': order_id}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

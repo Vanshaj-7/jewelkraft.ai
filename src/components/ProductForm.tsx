@@ -3,6 +3,8 @@ import { validateProduct, ValidationError } from '../utils/validation';
 import { useToast } from '../context/ToastContext';
 import { Product } from '../types';
 import { storageService } from '../services/storage';
+import { motion } from 'framer-motion';
+import { ShoppingCart } from 'lucide-react';
 
 interface ProductFormProps {
   designId: string;
@@ -15,7 +17,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ designId, onSave }) => {
   const [formData, setFormData] = useState({
     material: '',
     size: '',
-    karat: 0,
     color: '',
     hallmark: '',
     purity: '',
@@ -68,7 +69,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ designId, onSave }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow border border-platinum">
+    <motion.form
+      className="bg-white rounded-lg shadow-soft p-6 space-y-6"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      onSubmit={handleSubmit}
+    >
       {/* Material Selection */}
       <div>
         <label className="block text-sm font-medium text-charcoal mb-2">
@@ -119,7 +126,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ designId, onSave }) => {
         </div>
       </div>
 
-      {/* Karat Selection (for silver, purity is more relevant, so we can skip or gray out) */}
       {/* Color Selection */}
       <div>
         <label className="block text-sm font-medium text-charcoal mb-2">
@@ -237,22 +243,28 @@ const ProductForm: React.FC<ProductFormProps> = ({ designId, onSave }) => {
           {error.message}
         </p>
       )}
-      <div className="flex gap-4">
-        <button
+      <div className="flex gap-4 mt-8">
+        <motion.button
           type="submit"
-          className="flex-1 px-6 py-3 bg-lavender-300 text-white rounded-full hover:bg-blue-200 transition-colors font-medium shadow"
+          className="flex-1 py-3 rounded-lg bg-primary-600 text-white font-semibold text-lg shadow-md hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+          aria-label="Buy Now"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Save Configuration
-        </button>
-        <button
+          Buy Now
+        </motion.button>
+        <motion.button
           type="button"
           onClick={handleAddToCart}
-          className="flex-1 px-6 py-3 bg-charcoal text-white rounded-full hover:bg-slate-700 transition-colors font-medium shadow"
+          className="flex-1 py-3 rounded-lg bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold text-lg shadow-xl border-2 border-yellow-400 hover:from-blue-400 hover:via-purple-400 hover:to-pink-400 transition-all flex items-center justify-center gap-2"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.98 }}
         >
+          <ShoppingCart className="w-5 h-5" />
           Add to Cart
-        </button>
+        </motion.button>
       </div>
-    </form>
+    </motion.form>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { validatePrompt, ValidationError } from '../utils/validation';
 import { useToast } from '../context/ToastContext';
+import { motion } from 'framer-motion';
 
 interface PromptInputProps {
   onSubmit: (prompt: string) => void;
@@ -29,46 +30,33 @@ const PromptInput: React.FC<PromptInputProps> = ({ onSubmit, isLoading, inputId 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="relative">
-        <textarea
-          value={prompt}
-          onChange={(e) => {
-            setPrompt(e.target.value);
-            setError(null);
-          }}
-          placeholder="Describe your dream silver jewelry piece... (e.g., 'A delicate silver necklace with a small sapphire pendant, featuring a modern geometric design')"
-          className={`
-            w-full h-32 p-4 pr-12 rounded-xl border border-platinum bg-white shadow focus:outline-none focus:ring-2 focus:ring-lavender-300 text-charcoal
-            ${error ? 'border-red-400' : 'border-platinum'}
-          `}
-          disabled={isLoading}
-          id={inputId}
-        />
-        <button
-          type="button"
-          className="absolute top-1/2 right-3 -translate-y-1/2 p-1 bg-lavender-100 rounded hover:bg-lavender-200 transition-colors cursor-pointer shadow"
-          aria-label="Suggest prompt"
-        >
-          <Sparkles size={20} className="text-lavender-300" />
-        </button>
-      </div>
-      {error && (
-        <p className="mt-2 text-sm text-red-400">
-          {error.message}
-        </p>
-      )}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-400">{prompt.length}/500 characters</span>
-        <button
-          type="submit"
-          className="px-6 py-2 bg-lavender-300 text-white rounded-full hover:bg-blue-200 transition-colors font-medium shadow"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Dreaming...' : 'Dream'}
-        </button>
-      </div>
-    </form>
+    <motion.form
+      className="flex items-center bg-white rounded-lg shadow-soft px-4 py-3 space-x-2"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      onSubmit={handleSubmit}
+    >
+      <motion.input
+        id={inputId}
+        type="text"
+        className="flex-1 border-none outline-none bg-transparent text-lg font-serif placeholder-gray-400"
+        placeholder="Describe your dream jewelry..."
+        value={prompt}
+        onChange={e => setPrompt(e.target.value)}
+        disabled={isLoading}
+        whileFocus={{ scale: 1.03, boxShadow: '0 0 0 2px #b6b6e5' }}
+      />
+      <motion.button
+        type="submit"
+        className="px-6 py-2 rounded-lg bg-primary-600 text-white font-semibold text-lg shadow-md hover:bg-primary-700 transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.97 }}
+        disabled={isLoading || !prompt.trim()}
+      >
+        {isLoading ? 'Generating...' : 'Generate'}
+      </motion.button>
+    </motion.form>
   );
 };
 
