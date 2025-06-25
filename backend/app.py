@@ -222,6 +222,21 @@ def generate_images():
             'error': str(e)
         }), 500
 
+@app.route('/api/test', methods=['GET'])
+def test_api():
+    """Test endpoint to verify OpenAI API key is working."""
+    if not OPENAI_API_KEY:
+        return jsonify({
+            'success': False,
+            'message': 'OpenAI API key not configured'
+        }), 500
+    
+    return jsonify({
+        'success': True,
+        'message': 'OpenAI API key is configured',
+        'key_length': len(OPENAI_API_KEY)
+    })
+
 @app.route('/api/product_details', methods=['GET'])
 def get_product_details():
     # Mock product details
